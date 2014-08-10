@@ -155,9 +155,3 @@ $RECYCLE.BIN/
 
 # Mac desktop service store files
 .DS_Store
-
-# ResortRealm specific files
-ResortRealm.Web/images/property/*
-ResortRealm.Web/images/vendor/*
-!ResortRealm.Cache
-VB-Old/

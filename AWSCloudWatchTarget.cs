@@ -47,6 +47,8 @@ namespace NLog.Targets.AWSCloudWatch
         {
             base.InitializeTarget();
 
+            InternalLogger.Debug("Initialising AWSCloudWatch '{0}' target", Endpoint);
+
             try
             {
                 if (string.IsNullOrEmpty(AwsAccessKey) || string.IsNullOrEmpty(AwsSecretAccessKey))
@@ -63,11 +65,14 @@ namespace NLog.Targets.AWSCloudWatch
             {
                 InternalLogger.Fatal("Amazon CloudWatch client failed to be configured and won't send any messages. Error is\n{0}\n{1}", e.Message, e.StackTrace);
             }
+
+            InternalLogger.Debug("Initialised AWSCloudWatch '{0}' target", Endpoint);
         }
 
 
         protected override void Write(LogEventInfo logEvent)
         {
+            InternalLogger.Debug("Sending log to AWSCloudWatch '{0}' {1}.{2}", Endpoint, this.Namespace, this.MetricName);
             try
             {
                 string logMessage = this.Layout.Render(logEvent);
@@ -82,8 +87,11 @@ namespace NLog.Targets.AWSCloudWatch
                 });
 
                 try
-                {
+                {           
                     var response = client.PutMetricData(metricRequest);
+
+                    InternalLogger.Debug("Sent log to AWSCloudWatch, response received. HttpStatusCode: {0}, RequestId: {1}",
+                       response.HttpStatusCode, response.ResponseMetadata.RequestId);
                 }
                 catch (InternalServiceException e)
                 {
@@ -94,7 +102,7 @@ namespace NLog.Targets.AWSCloudWatch
             }
             catch (Exception e)
             {
-                InternalLogger.Fatal("Failed to write log to Amazon CloudWatch with\n{3}\n{4}",
+                InternalLogger.Fatal("Failed to write log to Amazon CloudWatch with\n{0}\n{1}",
                        e.Message, e.StackTrace);
             }
         }

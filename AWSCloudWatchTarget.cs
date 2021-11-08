@@ -12,6 +12,7 @@ using Amazon;
 using Amazon.CloudWatch.Model;
 using System.ComponentModel;
 using NLog.Common;
+using Amazon.Runtime;
 
 namespace NLog.Targets.AWSCloudWatch
 {
@@ -54,11 +55,12 @@ namespace NLog.Targets.AWSCloudWatch
                 if (string.IsNullOrEmpty(AwsAccessKey) || string.IsNullOrEmpty(AwsSecretAccessKey))
                 {
                     InternalLogger.Info("AWS Access Keys are not specified. Use Application Setting or EC2 Instance profile for keys.");
-                    client = AWSClientFactory.CreateAmazonCloudWatchClient(RegionEndpoint.GetBySystemName(Endpoint));
+                    client = new AmazonCloudWatchClient(RegionEndpoint.GetBySystemName(Endpoint));
                 }
                 else
                 {
-                    client = AWSClientFactory.CreateAmazonCloudWatchClient(AwsAccessKey, AwsSecretAccessKey, RegionEndpoint.GetBySystemName(Endpoint));
+                    var creditials = new BasicAWSCredentials(AwsAccessKey, AwsSecretAccessKey);
+                    client = new AmazonCloudWatchClient(creditials, RegionEndpoint.GetBySystemName(Endpoint));
                 }
             }
             catch (Exception e)
@@ -81,7 +83,7 @@ namespace NLog.Targets.AWSCloudWatch
                 metricRequest.MetricData.Add(new MetricDatum
                 {
                     MetricName = this.MetricName,
-                    Timestamp = DateTime.UtcNow,
+                    TimestampUtc = DateTime.UtcNow,
                     Unit = this.Unit,
                     Value = this.Value
                 });
